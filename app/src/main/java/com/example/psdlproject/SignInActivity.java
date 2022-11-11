@@ -12,8 +12,8 @@ import android.widget.Toast;
 
 import com.example.psdlproject.Models.Users;
 import com.example.psdlproject.databinding.ActivitySignInBinding;
-import com.example.psdlproject.databinding.ActivitySignUpBinding;
-import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -51,8 +51,10 @@ public class SignInActivity extends AppCompatActivity {
         progressDialog.setMessage("Please wait\nValidation in progress!");
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("537225966535-d7u53sn73glsre3n709unvdvue347k9t.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
+
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         binding.btnSignIn.setOnClickListener(new View.OnClickListener() {
@@ -79,11 +81,14 @@ public class SignInActivity extends AppCompatActivity {
                 }
             }
         });
+
         getSupportActionBar().hide();
+
         if(mAuth.getCurrentUser()!=null){
             Intent intent = new Intent(SignInActivity.this, MainActivity.class);
             startActivity(intent);
         }
+
         binding.txtClickSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -133,6 +138,12 @@ public class SignInActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("TAG", "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+
+                            Users users = new Users();
+                            users.setUserId(user.getUid());
+                            users.setUserName(user.getDisplayName());
+                            users.setProfilePic(user.getPhotoUrl().toString());
+                            firebaseDatabase.getReference().child("Users").child(user.getUid()).setValue(users);
 
                             Intent intent = new Intent(SignInActivity.this, MainActivity.class);
                             startActivity(intent);
